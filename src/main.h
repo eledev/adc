@@ -1,8 +1,6 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
-#include <file.h>
-
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "avr/eeprom.h"

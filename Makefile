@@ -37,10 +37,7 @@ MCU = -mmcu=atmega8
 ######################################
 # C sources
 C_SOURCES =  \
-src/$(TARGET).c \
-src/file.c
-
-
+src/$(TARGET).c 
 
 
 # Includes directories

@@ -1,0 +1,5 @@
+build/main.bin
+build/main.d
+build/main.elf
+build/main.hex
+build/main.o
