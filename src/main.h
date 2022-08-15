@@ -5,7 +5,7 @@
 #include <avr/interrupt.h>
 #include "avr/eeprom.h"
 
-#define F_CPU				            8000000UL//11059200UL
+#define F_CPU				            11059200UL
 #define	TIMERFRQ			            1000UL
 #define BAUD                            9600
 #define UART_UBRR                       (F_CPU / 16 / BAUD) - 1
