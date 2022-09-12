@@ -44,13 +44,6 @@ src/$(TARGET).c
 INCLUDES_DIRS =  \
 -Isrc
 
-
-# Sources directories
-SOURCES_DIRS =  \
-src/
-
-
-
 # Build path
 BUILD_DIR = build
 
@@ -64,8 +57,11 @@ OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
 
 
+# $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
+# 	$(CC) -g -Os -MMD -MP -MF"$(@:%.o=%.d)"  $(MCU) $(INCLUDES_DIRS) -c  $< -o $@
+
 $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
-	$(CC) -g -Os -MMD -MP -MF"$(@:%.o=%.d)"  $(MCU) $(INCLUDES_DIRS) -c  $< -o $@
+	$(CC) -g -O0 -MMD -MP -MF"$(@:%.o=%.d)"  $(MCU) $(INCLUDES_DIRS) -c  $< -o $@
 
 
 
@@ -91,11 +87,16 @@ clean:
 	-rm -fR $(BUILD_DIR)
 
 #######################################
-# clean up
+# install 
 #######################################
 install:
 	avrdude -p m8 -c usbasp -P usb -U flash:w:"$(BUILD_DIR)/$(TARGET).hex":i
 
+#######################################
+# erase chip 
+#######################################
+erase:
+	avrdude -p m8 -c usbasp -e 
 
 #######################################
 # dependencies
