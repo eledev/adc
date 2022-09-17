@@ -1,12 +1,30 @@
 #include "main.h"
 
-uint8_t message[] = "test message\r\n";
+const uint8_t CMD_HELP[] PROGMEM = "cmd\r";
+const uint8_t CMD_CH00[] PROGMEM = "cmd_ch00\r";
+const uint8_t CMD_CH01[] PROGMEM = "cmd_ch01\r";
+
+uint8_t message[] = "test message %d\r";
 uint8_t cnt = 0;
 uint8_t rxBuffer[RX_DATA_BUFFER_LENGTH];
 uint16_t rxBufferIndex = 0;
 uint16_t rxTimeOut = 0;
 
 APP_STATUS appStatus = LISTENING;
+
+
+static int uart_putchar(char c, FILE *stream);
+static FILE mystdout = FDEV_SETUP_STREAM(uart_putchar, NULL, _FDEV_SETUP_WRITE);
+static int uart_putchar(char c, FILE *stream) {
+	if (c == '\n')
+    uart_putchar('\r', stream);
+  	loop_until_bit_is_set(UCSRA, UDRE);
+	UDR = c;
+	return 0;
+}
+
+
+
 
 ISR(TIMER1_COMPA_vect) {
 	if(rxTimeOut > 0){
@@ -51,30 +69,32 @@ ISR(USART_RXC_vect) {
 	if(appStatus == RECEIVING && rxBufferIndex < RX_DATA_BUFFER_LENGTH) {
 		rxBuffer[rxBufferIndex] = symbol;
 		rxBufferIndex++;
+		rxBuffer[rxBufferIndex] = 0;
 		rxTimeOut = RX_DATA_TIMEOUT;
 	}
 }
 
-int writeSerial(char* str)
-{
-	uint16_t i;
-	uint16_t lenth = strlen(str)+1;
-	for(i = 0; i < lenth; i++)
-	{
-		while(!(UCSRA & (1<<UDRE))){}; // wait ready of port
-		UDR = str[i];
-	}
+// int writeSerial(char* str)
+// {
+// 	uint16_t i;
+// 	uint16_t lenth = strlen(str)+1;
+// 	for(i = 0; i < lenth; i++)
+// 	{
+// 		loop_until_bit_is_set(UCSRA, UDRE);
+// 		UDR = str[i];
+// 	}
 
-	return 0;
-}
+// 	return 0;
+// }
 
 int main(void) {
   	OCR1A = F_CPU / TIMERFRQ - 1;
 	TCCR1B = (1 << CS10) | (1 << WGM12);
  	TIMSK = TIMSK | (1 << OCIE1A);
 
-	UBRRH = (uint8_t) (UART_UBRR >> 8);
-	UBRRL = (uint8_t) UART_UBRR;
+	UBRRH = UBRRH_VALUE;
+   	UBRRL = UBRRL_VALUE;
+  
 	/* Enable receiver and transmitter */
 	UCSRB = (1 << TXEN) | //(1 << TXCIE) | 
 	(1 << RXEN) |  (1 << RXCIE); 
@@ -85,17 +105,19 @@ int main(void) {
 
 	ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS0); 
 
+ 	stdout = &mystdout;
+
+
 	sei();
 		
 	while(1){
 		if(appStatus == IS_RECEIVED) {
 			appStatus = TRANSMITING;
-			
-			writeSerial(message);
+			if(!strcmp_P(rxBuffer, CMD_HELP)){
+				printf(message, 12);
+			}
+
 			appStatus = LISTENING;
-//			appStatus = LISTENING;
-			// cnt = 1;
-			// UDR = message[0];
 		}
 	};
 	return 0;

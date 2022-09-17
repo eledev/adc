@@ -52,30 +52,23 @@ vpath %.c $(sort $(dir $(C_SOURCES)))
 
 # list of objects
 OBJECTS = $(addprefix $(BUILD_DIR)/,$(notdir $(C_SOURCES:.c=.o)))
-#OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
+OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(ASM_SOURCES:.s=.o)))
 
 all: $(BUILD_DIR)/$(TARGET).elf $(BUILD_DIR)/$(TARGET).hex $(BUILD_DIR)/$(TARGET).bin
 
 
-# $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
-# 	$(CC) -g -Os -MMD -MP -MF"$(@:%.o=%.d)"  $(MCU) $(INCLUDES_DIRS) -c  $< -o $@
-
 $(BUILD_DIR)/%.o: %.c Makefile | $(BUILD_DIR)
 	$(CC) -g -O0 -MMD -MP -MF"$(@:%.o=%.d)"  $(MCU) $(INCLUDES_DIRS) -c  $< -o $@
-
-
 
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) Makefile
 	$(CC) -g  $(MCU) $(OBJECTS) -o $@
 	$(SZ) $@
-
 
 $(BUILD_DIR)/%.hex: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(CP) -j .text -j .data -O ihex $< $@
 
 $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf | $(BUILD_DIR)
 	$(CP) -O binary -S $< $@
-
 
 $(BUILD_DIR):
 	mkdir $@

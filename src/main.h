@@ -1,14 +1,17 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
+#include <stdio.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/pgmspace.h>
 #include <string.h>
 
 #define F_CPU				            11059200UL
-#define	TIMERFRQ			            1000UL
 #define BAUD                            9600
-#define UART_UBRR                       (F_CPU / 16UL / BAUD) - 1
+#include <util/setbaud.h>
+
+#define	TIMERFRQ			            1000UL
 
 #define RX_DATA_BUFFER_LENGTH           80UL
 #define RX_DATA_TIMEOUT                 500
